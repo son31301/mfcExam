@@ -22,7 +22,9 @@
 
 #include <afxdisp.h>        // MFC 자동화 클래스입니다.
 
-
+#define COLOR_RED		RGB(0xff, 0x00, 0x00)
+#define COLOR_GREEN		RGB(0x00, 0xff, 0x00)
+#define COLOR_YELLOW	RGB(0xff, 0xff, 0x00)
 
 #ifndef _AFX_NO_OLE_SUPPORT
 #include <afxdtctl.h>           // Internet Explorer 4 공용 컨트롤에 대한 MFC 지원입니다.

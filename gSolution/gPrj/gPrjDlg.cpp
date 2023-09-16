@@ -11,7 +11,7 @@
 #define new DEBUG_NEW
 #endif
 
-#pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
+//#pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
 
 // 응용 프로그램 정보에 사용되는 CAboutDlg 대화 상자입니다.
 
@@ -52,6 +52,7 @@ END_MESSAGE_MAP()
 
 CgPrjDlg::CgPrjDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(IDD_GPRJ_DIALOG, pParent)
+	, m_nSize(20)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -59,14 +60,17 @@ CgPrjDlg::CgPrjDlg(CWnd* pParent /*=NULL*/)
 void CgPrjDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
+	DDX_Text(pDX, IDC_EDIT_SIZE, m_nSize);
+	DDV_MinMaxInt(pDX, m_nSize, 0, 1000);
 }
 
 BEGIN_MESSAGE_MAP(CgPrjDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
-	ON_BN_CLICKED(IDC_BUTTON1, &CgPrjDlg::OnBnClickedButton1)
 	ON_WM_DESTROY()
+	ON_BN_CLICKED(IDC_BTN_TEST, &CgPrjDlg::OnBnClickedBtnTest)
+	ON_BN_CLICKED(IDC_BTN_CIRCLE, &CgPrjDlg::OnBnClickedBtnCircle)
 END_MESSAGE_MAP()
 
 
@@ -102,7 +106,11 @@ BOOL CgPrjDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 작은 아이콘을 설정합니다.
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
-
+	MoveWindow(0, 0, 1280, 800);
+	m_pDlgImage = new CDlgImage;
+	m_pDlgImage->Create(IDD_DLGIMAGE, this);
+	m_pDlgImage->ShowWindow(SW_SHOW);
+	m_pDlgImage->MoveWindow(0, 0, 1280, 600);
 
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
@@ -156,27 +164,44 @@ HCURSOR CgPrjDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
-
-void CgPrjDlg::OnBnClickedButton1()
-{
-	//CDlgImage dlg;
-	//dlg.DoModal();
-
-	m_pDlgImage = new CDlgImage;
-	m_pDlgImage->Create(IDD_DLGIMAGE, this);
-	m_pDlgImage->ShowWindow(SW_SHOW);
-}
-
-
 void CgPrjDlg::OnDestroy()
 {
 	CDialogEx::OnDestroy();
 
-	delete m_pDlgImage;
+	if (m_pDlgImage)
+		delete m_pDlgImage;
 }
 
 #include <iostream>.h
 void CgPrjDlg::callFunc(int n)
 {
 	std::cout << n << std::endl;
+}
+
+void CgPrjDlg::OnBnClickedBtnTest()
+{
+
+}
+
+void CgPrjDlg::OnBnClickedBtnCircle()
+{
+	unsigned char* fm = (unsigned char*)m_pDlgImage->m_image.GetBits();
+	int nWidth = m_pDlgImage->m_image.GetWidth();
+	int nHeight = m_pDlgImage->m_image.GetHeight();
+	int nPitch = m_pDlgImage->m_image.GetPitch();
+	memset(fm, 0, nWidth*nHeight);
+
+	UpdateData(true);
+	m_pDlgImage->m_nDataSize = m_nSize;
+
+	for (int k = 0; k < MAX_POINT; k++) {
+		int x = rand() % nWidth;
+		int y = rand() % nHeight;
+		fm[y * nPitch + x] = rand() % 0xff;
+		m_pDlgImage->m_nDataCount = k;
+		m_pDlgImage->m_ptData[k].x = x;
+		m_pDlgImage->m_ptData[k].y = y;
+	}
+
+	m_pDlgImage->Invalidate();
 }
